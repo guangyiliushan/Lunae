@@ -3,6 +3,7 @@ package pers.guang.lunae
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.*
@@ -25,8 +26,8 @@ import lunae.composeapp.generated.resources.compose_multiplatform
 
 
 sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
-    object Home : Screen("home", "Home", Icons.Default.Home)
-    object Settings : Screen("settings", "Settings", Icons.Default.Settings)
+    data object Home : Screen("home", "Home", Icons.Default.Home)
+    data object Settings : Screen("settings", "Settings", Icons.Default.Settings)
 }
 
 
@@ -35,12 +36,25 @@ sealed class Screen(val route: String, val label: String, val icon: ImageVector)
 fun App() {
     MaterialTheme {
         var selectedScreen by remember { mutableStateOf<Screen>(Screen.Home) }
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            when (selectedScreen) {
-                is Screen.Home -> HomeScreen()
-                is Screen.Settings -> SettingsScreen()
+        Column(Modifier.fillMaxWidth()) {
+            Box(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                when (selectedScreen) {
+                    is Screen.Home -> HomeScreen()
+                    is Screen.Settings -> SettingsScreen()
+                }
             }
-            BottomNavigation {
+
+            // 底部导航栏
+            BottomNavigation(
+                backgroundColor = MaterialTheme.colors.primary,
+                contentColor = MaterialTheme.colors.onPrimary,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 BottomNavigationItem(
                     selected = selectedScreen is Screen.Home,
                     onClick = { selectedScreen = Screen.Home },
@@ -63,8 +77,18 @@ fun App() {
 fun HomeScreen() {
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("Welcome to the Home Screen!")
+        val greeting = remember { Greeting().greet() }
+        var showContent by remember { mutableStateOf(false) }
+        Button(onClick = { showContent = !showContent }) {
+            Text("Toggle Content")
+        }
+        AnimatedVisibility(showContent) {
+            Text("Compose: $greeting")
+        }
+        Image(painterResource(Res.drawable.compose_multiplatform), null)
     }
 }
+
 
 
 @Composable
@@ -73,3 +97,5 @@ fun SettingsScreen() {
         Text("Welcome to the Settings Screen!")
     }
 }
+
+
